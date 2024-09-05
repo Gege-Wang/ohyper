@@ -1,6 +1,6 @@
 #![no_std]
 #![no_main]
-use core::fmt::Write;
+#![feature(abi_x86_interrupt)]
 
 #[macro_use]
 extern crate log;
@@ -8,6 +8,8 @@ extern crate log;
 mod lang_items;
 mod uart;
 mod uart16550;
+mod interrupts;
+mod gdt;
 #[macro_use]
 mod logging;
 
@@ -33,5 +35,14 @@ pub extern "C" fn _start() -> ! {
     );
     logging::init();
     info!("Logging initialized");
-    loop{}
+    interrupts::init();
+    gdt::init();
+    x86_64::instructions::interrupts::int3();
+    hlt_loop();
+}
+
+fn hlt_loop() -> ! {
+    loop{
+        x86_64::instructions::hlt();
+    }
 }
