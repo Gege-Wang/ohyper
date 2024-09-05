@@ -10,8 +10,18 @@ mod uart;
 mod uart16550;
 mod interrupts;
 mod gdt;
+mod lapic;
+mod timer;
 #[macro_use]
 mod logging;
+
+
+use core::sync::atomic::{AtomicBool, Ordering};
+
+static INIT_OK: AtomicBool = AtomicBool::new(false);
+pub fn init_ok() -> bool {
+    INIT_OK.load(Ordering::SeqCst)
+}
 
 const HELLO: &'static str = r"
     OOOOO   HH   HH YYY   YYY PPPPPP  EEEEEEE RRRRRR
@@ -37,7 +47,12 @@ pub extern "C" fn _start() -> ! {
     info!("Logging initialized");
     interrupts::init();
     gdt::init();
-    x86_64::instructions::interrupts::int3();
+    lapic::init();
+    timer::init();
+    INIT_OK.store(true, Ordering::SeqCst);
+    //x86_64::instructions::interrupts::int3();
+    x86_64::instructions::interrupts::enable();
+    info!("Interrupts enabled");
     hlt_loop();
 }
 

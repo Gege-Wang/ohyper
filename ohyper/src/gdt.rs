@@ -4,7 +4,7 @@ use x86_64::instructions::tables::load_tss;
 use x86_64::registers::segmentation::{Segment, CS};
 use x86_64::structures::tss::TaskStateSegment;
 use lazy_static::lazy_static;
-use crate::logging;
+use core::ptr::addr_of;
 
 lazy_static! {
     static ref TSS: TaskStateSegment = {
@@ -12,8 +12,8 @@ lazy_static! {
         tss.interrupt_stack_table[0] = {
             const STACK_SIZE: usize = 4096 * 5;
             static mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
-
-            let stack_start = VirtAddr::from_ptr(unsafe{ &STACK });
+            #[warn(static_mut_refs)]
+            let stack_start = VirtAddr::from_ptr(unsafe{ addr_of!(STACK) });
             let stack_end = stack_start + STACK_SIZE as u64;
             stack_end
         };
