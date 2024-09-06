@@ -12,11 +12,17 @@ mod interrupts;
 mod gdt;
 mod lapic;
 mod timer;
+mod memory;
+mod heap;
+mod hv;
 #[macro_use]
 mod logging;
 
+extern crate alloc;
 
 use core::sync::atomic::{AtomicBool, Ordering};
+use bootloader::{BootInfo, entry_point};
+use x86_64::VirtAddr;
 
 static INIT_OK: AtomicBool = AtomicBool::new(false);
 pub fn init_ok() -> bool {
@@ -30,8 +36,11 @@ const HELLO: &'static str = r"
    OO   OO  HH   HH   YYY     PP      EE      RR  RR
     OOOOO   HH   HH   YYY     PP      EEEEEEE RR   RR
 ";
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+
+entry_point!(kernel_main);
+fn kernel_main(bootloader_info: &'static BootInfo) -> ! {
+// #[no_mangle]
+// extern "C" fn _start() -> ! {
     println!("{}", HELLO);
     println!(
         "\
@@ -53,6 +62,17 @@ pub extern "C" fn _start() -> ! {
     //x86_64::instructions::interrupts::int3();
     x86_64::instructions::interrupts::enable();
     info!("Interrupts enabled");
+
+    let physical_mem_offset = VirtAddr::new(bootloader_info.physical_memory_offset);
+    let mut mapper = unsafe { memory::init(physical_mem_offset) };
+    let mut frame_allocator = unsafe{
+        memory::BootInfoFrameAllocator::init(
+            &bootloader_info.memory_map
+        )
+    };
+    heap::init(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
+    info!("Initializd heap");
+    hv::run();
     hlt_loop();
 }
 

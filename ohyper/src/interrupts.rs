@@ -56,8 +56,8 @@ extern "x86-interrupt" fn page_fault_handler(
 
 extern "x86-interrupt" fn apic_timer_handler(_stack_frame: InterruptStackFrame) {
     // Handle the APIC timer interrupt
-    print!(".");
+    //print!(".");
 
     // End of interrupt for Local APIC
-    unsafe { local_apic().end_of_interrupt() };
+    unsafe { local_apic().end_of_interrupt()};
 }
