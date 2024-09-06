@@ -1,10 +1,9 @@
-use x86_64::structures::idt::InterruptDescriptorTable;
-use x86_64::structures::idt::{InterruptStackFrame, PageFaultErrorCode};
-use crate::println;
-use crate::print;
-use lazy_static::lazy_static;
 use crate::lapic::local_apic;
 use crate::lapic::vectors::APIC_TIMER_VECTOR;
+use crate::println;
+use lazy_static::lazy_static;
+use x86_64::structures::idt::InterruptDescriptorTable;
+use x86_64::structures::idt::{InterruptStackFrame, PageFaultErrorCode};
 
 // static mut IDT:InterruptDescriptorTable = InterruptDescriptorTable::new();
 // pub fn init_idt() {
@@ -22,7 +21,7 @@ lazy_static! {
             idt.double_fault.set_handler_fn(double_fault_handler).set_stack_index(0);
             // APIC Timer interrupt handler
             idt[APIC_TIMER_VECTOR].set_handler_fn(apic_timer_handler);
-        }          
+        }
         idt
     };
 }
@@ -59,5 +58,5 @@ extern "x86-interrupt" fn apic_timer_handler(_stack_frame: InterruptStackFrame) 
     //print!(".");
 
     // End of interrupt for Local APIC
-    unsafe { local_apic().end_of_interrupt()};
+    unsafe { local_apic().end_of_interrupt() };
 }

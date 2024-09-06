@@ -1,4 +1,3 @@
-
 use core::fmt::{self, Write};
 
 use log::{self, Level, LevelFilter, Log, Metadata, Record};

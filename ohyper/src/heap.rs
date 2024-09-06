@@ -1,15 +1,16 @@
-use core::alloc::GlobalAlloc;
 use buddy_system_allocator::LockedHeap;
 use x86_64::{
-    structures::paging::{mapper::MapToError, PageTableFlags, Mapper, Page, FrameAllocator, Size4KiB},
-    PhysAddr, VirtAddr,
+    structures::paging::{
+        mapper::MapToError, FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB,
+    },
+    VirtAddr,
 };
 
 const HEAP_START: usize = 0x_4444_4444_0000;
 const HEAP_SIZE: usize = 100 * 1024;
 
 #[global_allocator]
-static  ALLOCATOR: LockedHeap<32> = LockedHeap::empty();
+static ALLOCATOR: LockedHeap<32> = LockedHeap::empty();
 
 pub fn init(
     mapper: &mut impl Mapper<Size4KiB>,
@@ -28,9 +29,7 @@ pub fn init(
             .allocate_frame()
             .ok_or(MapToError::FrameAllocationFailed)?;
         let flags = PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
-        unsafe {
-            mapper.map_to(page, frame, flags, frame_allocator)?.flush()
-        };
+        unsafe { mapper.map_to(page, frame, flags, frame_allocator)?.flush() };
     }
     unsafe {
         ALLOCATOR.lock().init(HEAP_START, HEAP_SIZE);

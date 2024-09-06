@@ -1,7 +1,6 @@
 use raw_cpuid::CpuId;
 use x2apic::lapic::{TimerDivide, TimerMode};
 
-
 use crate::lapic::local_apic;
 use crate::println;
 
@@ -36,7 +35,6 @@ pub fn init() {
         lapic.set_timer_initial((LAPIC_TICKS_PER_SEC / TICKS_PER_SEC) as u32);
     }
 }
-
 
 use core::time::Duration;
 

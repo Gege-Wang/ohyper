@@ -1,5 +1,5 @@
-use x86_64::instructions::port::Port;
 use core::fmt::Write;
+use x86_64::instructions::port::Port;
 
 pub struct SerialPort {
     port: u16,
@@ -13,7 +13,7 @@ impl SerialPort {
         port.write_register(3, 0x80); // enable DLAB
         port.write_register(0, 0x01); // set baud rate
         port.write_register(1, 0x00); // set baud rate
-        port.write_register(3, 0x03); // 8 bits data, data checksum 
+        port.write_register(3, 0x03); // 8 bits data, data checksum
 
         port
     }
@@ -35,7 +35,6 @@ impl SerialPort {
             let lsb: u8 = Port::new(self.port + 5).read();
             lsb & 0x20 != 0
         }
-
     }
 }
 

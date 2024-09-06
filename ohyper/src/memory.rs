@@ -1,9 +1,9 @@
 use bootloader::bootinfo::MemoryMap;
-use x86_64::{
-    structures::paging::{OffsetPageTable, PageTable, FrameAllocator, PhysFrame, Size4KiB},
-    PhysAddr, VirtAddr
-};
 use bootloader::bootinfo::MemoryRegionType;
+use x86_64::{
+    structures::paging::{FrameAllocator, OffsetPageTable, PageTable, PhysFrame, Size4KiB},
+    PhysAddr, VirtAddr,
+};
 
 unsafe fn active_level_4_table(physical_memory_offset: VirtAddr) -> &'static mut PageTable {
     use x86_64::registers::control::Cr3;
@@ -36,7 +36,6 @@ impl BootInfoFrameAllocator {
         let addr_rangs = usable_regions.map(|r| r.range.start_addr()..r.range.end_addr());
         let frame_addresses = addr_rangs.flat_map(|r| r.step_by(4096));
         frame_addresses.map(|addr| PhysFrame::containing_address(PhysAddr::new(addr)))
-
     }
 }
 

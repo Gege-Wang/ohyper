@@ -5,23 +5,23 @@
 #[macro_use]
 extern crate log;
 
-mod lang_items;
-mod uart;
-mod uart16550;
-mod interrupts;
 mod gdt;
-mod lapic;
-mod timer;
-mod memory;
 mod heap;
 mod hv;
+mod interrupts;
+mod lang_items;
+mod lapic;
+mod memory;
+mod timer;
+mod uart;
+mod uart16550;
 #[macro_use]
 mod logging;
 
 extern crate alloc;
 
+use bootloader::{entry_point, BootInfo};
 use core::sync::atomic::{AtomicBool, Ordering};
-use bootloader::{BootInfo, entry_point};
 use x86_64::VirtAddr;
 
 static INIT_OK: AtomicBool = AtomicBool::new(false);
@@ -39,8 +39,8 @@ const HELLO: &'static str = r"
 
 entry_point!(kernel_main);
 fn kernel_main(bootloader_info: &'static BootInfo) -> ! {
-// #[no_mangle]
-// extern "C" fn _start() -> ! {
+    // #[no_mangle]
+    // extern "C" fn _start() -> ! {
     println!("{}", HELLO);
     println!(
         "\
@@ -65,11 +65,8 @@ fn kernel_main(bootloader_info: &'static BootInfo) -> ! {
 
     let physical_mem_offset = VirtAddr::new(bootloader_info.physical_memory_offset);
     let mut mapper = unsafe { memory::init(physical_mem_offset) };
-    let mut frame_allocator = unsafe{
-        memory::BootInfoFrameAllocator::init(
-            &bootloader_info.memory_map
-        )
-    };
+    let mut frame_allocator =
+        unsafe { memory::BootInfoFrameAllocator::init(&bootloader_info.memory_map) };
     heap::init(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
     info!("Initializd heap");
     hv::run();
@@ -77,7 +74,7 @@ fn kernel_main(bootloader_info: &'static BootInfo) -> ! {
 }
 
 fn hlt_loop() -> ! {
-    loop{
+    loop {
         x86_64::instructions::hlt();
     }
 }
