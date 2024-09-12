@@ -19,3 +19,4 @@ x2apic = "0.4"
 raw-cpuid = "10.6"
 buddy_system_allocator = "0.8"
 ovm = { path = "../ovm" }
+x86 = "0.52.0"

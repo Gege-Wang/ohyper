@@ -15,6 +15,7 @@ mod memory;
 mod timer;
 mod uart;
 mod uart16550;
+mod mapper;
 #[macro_use]
 mod logging;
 
@@ -23,6 +24,9 @@ extern crate alloc;
 use bootloader::{entry_point, BootInfo};
 use core::sync::atomic::{AtomicBool, Ordering};
 use x86_64::VirtAddr;
+use crate::mapper::MAPPER;
+use alloc::boxed::Box;
+
 
 static INIT_OK: AtomicBool = AtomicBool::new(false);
 pub fn init_ok() -> bool {
@@ -67,7 +71,18 @@ fn kernel_main(bootloader_info: &'static BootInfo) -> ! {
     let mut mapper = unsafe { memory::init(physical_mem_offset) };
     let mut frame_allocator =
         unsafe { memory::BootInfoFrameAllocator::init(&bootloader_info.memory_map) };
+
     heap::init(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
+    unsafe {
+        let mut mapper_lock = MAPPER.lock();
+        *mapper_lock = Some(Box::new(mapper));
+    }
+
+    // {
+    //     let mut frame_allocator_lock = FRAME_ALLOCATOR.lock();
+    //     *frame_allocator_lock = Some(frame_allocator);
+    // }
+
     info!("Initializd heap");
     hv::run();
     hlt_loop();

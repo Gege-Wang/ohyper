@@ -95,3 +95,7 @@ pub fn console_getchar() -> Option<u8> {
 pub fn init() {
     COM1.lock().init(115200);
 }
+
+
+
+
